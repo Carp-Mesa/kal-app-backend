@@ -9,6 +9,9 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -57,7 +60,7 @@ jobs:
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v4
+        uses: azure/webapps-deploy@v3
         with:
           app-name: 'kal-api'
           slot-name: 'Production'
