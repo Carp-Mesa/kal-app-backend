@@ -6,6 +6,7 @@ import nutritionRoutes from './routes/nutrition.routes';
 import waterRoutes from './routes/water.routes';
 import workoutRoutes from './routes/workout.routes';
 import sleepRoutes from './routes/sleep.routes';
+import authRoutes from './routes/auth.routes';
 
 // Cargar variables de entorno solo en desarrollo local
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use(morgan('dev')); // Para ver logs de peticiones en la terminal
 
 // Rutas de la API
+app.use('/api/auth', authRoutes);
 app.use('/api/nutrition', nutritionRoutes);
 app.use('/api/water', waterRoutes);
 app.use('/api/workouts', workoutRoutes);
