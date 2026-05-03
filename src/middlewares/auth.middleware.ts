@@ -18,24 +18,23 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     }
 
     const token = authHeader.split(' ')[1];
-    const secretStr = process.env.SUPABASE_JWT_SECRET;
-    
-    if (!secretStr) {
-      console.error('SUPABASE_JWT_SECRET is not configured');
-      res.status(500).json({ error: 'Internal server error' });
-      return;
+
+    // Decode token without strict verification first to debug
+    const supabase = require('../config/supabase').supabase;
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+        console.error('Supabase Auth Error:', error?.message);
+        res.status(401).json({ error: 'Invalid or expired token', details: error?.message });
+        return;
     }
 
-    const secret = new TextEncoder().encode(secretStr);
-    
-    // Validate JWT using jose
-    const { payload } = await jwtVerify(token, secret);
-    
     // Sub contains the user ID in Supabase
-    req.user = { id: payload.sub as string };
+    req.user = { id: user.id };
     
     next();
-  } catch (error) {
-    res.status(401).json({ error: 'Invalid or expired token' });
+  } catch (error: any) {
+    console.error('Middleware Error:', error);
+    res.status(401).json({ error: 'Invalid or expired token', message: error.message });
   }
 };

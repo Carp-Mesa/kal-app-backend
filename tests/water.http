@@ -1,0 +1,18 @@
+@baseUrl = http://localhost:8080
+@token = tu_access_token_aqui
+
+### 1. Registrar 500ml de agua (Endpoint POST /api/water)
+POST {{baseUrl}}/api/water/
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "amount_ml": 500
+}
+
+### 2. Consultar el progreso de hoy
+GET {{baseUrl}}/api/water/progress/today
+Authorization: Bearer {{token}}
+
+### 3. Prueba de Seguridad (Sin auth)
+GET {{baseUrl}}/api/water/progress/today

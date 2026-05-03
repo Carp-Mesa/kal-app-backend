@@ -50,20 +50,30 @@ export const waterService = {
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('water_goal')
-      .eq('user_id', userId)
+      .eq('id', userId) // En Supabase, la tabla profiles normalmente usa 'id' como la referencia a auth.users.id
       .single();
 
-    if (profileError) throw new Error(`Error fetching profile: ${profileError.message}`);
+    if (profileError && profileError.code !== 'PGRST116') {
+      throw new Error(`Error fetching profile: ${profileError.message}`);
+    }
 
     const goal_ml = profile?.water_goal || 2000; // 2L por defecto si no existe
 
-    // 2. Definir los límites de tiempo para "hoy"
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
+    // 2. Definir los límites de tiempo para "hoy" (Ajustado manualmente para UTC-5 / Colombia)
+    const now = new Date();
+    // Extraer la hora local asumiendo un offset de -5 horas
+    now.setUTCHours(now.getUTCHours() - 5);
+
+    // Ajustar a la medianoche del usuario
+    const todayStart = new Date(now);
+    todayStart.setUTCHours(0, 0, 0, 0);
+    // Devolver al UTC sumando las 5 horas para que en base de datos consulte desde las 5AM UTC
+    todayStart.setUTCHours(todayStart.getUTCHours() + 5);
+
     const startIso = todayStart.toISOString();
 
     const todayEnd = new Date(todayStart);
-    todayEnd.setDate(todayEnd.getDate() + 1);
+    todayEnd.setUTCDate(todayEnd.getUTCDate() + 1);
     const endIso = todayEnd.toISOString();
 
     // 3. Consultar todos los registros de hoy

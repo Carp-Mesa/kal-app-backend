@@ -33,9 +33,12 @@ export interface WaterLog {
 export interface Workout {
   id: string; // UUID
   user_id: string; // UUID
-  date: string;
+  name: string; // Ej: "Push Day"
+  duration_mins: number;
+  date?: string;
   notes?: string;
   created_at?: string;
+  exercises?: Exercise[]; // Relación incluída
 }
 
 export interface Exercise {
@@ -43,7 +46,7 @@ export interface Exercise {
   workout_id: string; // UUID (Foreign Key to Workouts)
   name: string;
   rpe: number;
-  weights: number; // in kg/lbs
+  weight_kg: number; // Actualizado de weights a weight_kg
   reps: number;
   sets: number;
   created_at?: string;

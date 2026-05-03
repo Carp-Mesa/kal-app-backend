@@ -12,6 +12,16 @@ export const nutritionController = {
     }
   },
 
+  async getProgress(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user!.id;
+      const progress = await nutritionService.getDailyProgress(userId);
+      res.status(200).json(progress);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  },
+
   async createLog(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user!.id;

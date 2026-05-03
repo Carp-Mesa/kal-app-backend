@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import nutritionRoutes from './routes/nutrition.routes';
 import waterRoutes from './routes/water.routes';
+import workoutRoutes from './routes/workout.routes';
 
 // Cargar variables de entorno solo en desarrollo local
 dotenv.config();
@@ -18,6 +19,7 @@ app.use(morgan('dev')); // Para ver logs de peticiones en la terminal
 // Rutas de la API
 app.use('/api/nutrition', nutritionRoutes);
 app.use('/api/water', waterRoutes);
+app.use('/api/workouts', workoutRoutes);
 
 // Ruta de prueba (Heartbeat)
 app.get('/', (req: Request, res: Response) => {
