@@ -2,6 +2,8 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import nutritionRoutes from './routes/nutrition.routes';
+import waterRoutes from './routes/water.routes';
 
 // Cargar variables de entorno solo en desarrollo local
 dotenv.config();
@@ -12,6 +14,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev')); // Para ver logs de peticiones en la terminal
+
+// Rutas de la API
+app.use('/api/nutrition', nutritionRoutes);
+app.use('/api/water', waterRoutes);
 
 // Ruta de prueba (Heartbeat)
 app.get('/', (req: Request, res: Response) => {
