@@ -88,5 +88,15 @@ export const sleepController = {
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
+  },
+  async getTodayProgress(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user!.id;
+      const progress = await sleepService.getTodayProgress(userId);
+      res.status(200).json(progress);
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({ error: error.message });
+    }
   }
 };

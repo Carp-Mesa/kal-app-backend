@@ -8,6 +8,7 @@ const router = Router();
 router.use(authMiddleware);
 
 // Rutas analíticas
+router.get('/progress/today', sleepController.getTodayProgress);
 router.get('/recent', sleepController.getRecent);
 
 // CRUD

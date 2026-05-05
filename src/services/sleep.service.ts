@@ -97,5 +97,52 @@ export const sleepService = {
     });
 
     return enrichedLogs;
+  },
+
+  async getTodayProgress(userId: string) {
+    const now = new Date();
+    // Offset UTC-5 Colombia
+    now.setUTCHours(now.getUTCHours() - 5);
+    
+    // Ajustar a la medianoche local de HOY
+    const todayStart = new Date(now);
+    todayStart.setUTCHours(0, 0, 0, 0);
+    todayStart.setUTCHours(todayStart.getUTCHours() + 5);
+    const startIso = todayStart.toISOString();
+
+    const todayEnd = new Date(todayStart);
+    todayEnd.setUTCDate(todayEnd.getUTCDate() + 1);
+    const endIso = todayEnd.toISOString();
+
+    // Consideramos los registros de sueño donde el end_time (cuando se levantó) fue "hoy"
+    const { data: logs, error } = await supabase
+      .from('sleep_logs')
+      .select('start_time, end_time, quality_score')
+      .eq('user_id', userId)
+      .gte('end_time', startIso)
+      .lt('end_time', endIso);
+
+    if (error) throw new Error(`Error fetching sleep logs: ${error.message}`);
+
+    let total_minutes = 0;
+    
+    if (logs) {
+      for (const log of logs) {
+        const start = new Date(log.start_time);
+        const end = new Date(log.end_time);
+        const diffMs = end.getTime() - start.getTime();
+        total_minutes += Math.floor(diffMs / 60000);
+      }
+    }
+
+    const hours = Math.floor(total_minutes / 60);
+    const minutes = total_minutes % 60;
+    const is_completed = logs && logs.length > 0;
+
+    return {
+      is_completed,
+      duration: { hours, minutes, total_minutes },
+      logs_count: logs?.length || 0
+    };
   }
 };

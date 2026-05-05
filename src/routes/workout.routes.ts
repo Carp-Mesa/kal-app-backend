@@ -8,6 +8,7 @@ const router = Router();
 router.use(authMiddleware);
 
 // Rutas
+router.get('/progress/today', workoutController.getTodayProgress);
 router.post('/', workoutController.createFullWorkout);
 
 export default router;

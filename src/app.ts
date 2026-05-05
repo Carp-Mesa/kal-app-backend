@@ -22,7 +22,7 @@ app.use(morgan('dev')); // Para ver logs de peticiones en la terminal
 app.use('/api/auth', authRoutes);
 app.use('/api/nutrition', nutritionRoutes);
 app.use('/api/water', waterRoutes);
-app.use('/api/workouts', workoutRoutes);
+app.use('/api/workout', workoutRoutes);
 app.use('/api/sleep', sleepRoutes);
 
 // Ruta de prueba (Heartbeat)

@@ -53,5 +53,36 @@ export const workoutService = {
       ...workout,
       exercises: exercises as Exercise[]
     } as Workout;
+  },
+
+  async getTodayProgress(userId: string) {
+    const now = new Date();
+    now.setUTCHours(now.getUTCHours() - 5);
+    const todayStart = new Date(now);
+    todayStart.setUTCHours(0, 0, 0, 0);
+    todayStart.setUTCHours(todayStart.getUTCHours() + 5);
+    const startIso = todayStart.toISOString();
+
+    const todayEnd = new Date(todayStart);
+    todayEnd.setUTCDate(todayEnd.getUTCDate() + 1);
+    const endIso = todayEnd.toISOString();
+
+    const { data: logs, error } = await supabase
+      .from('workouts')
+      .select('duration_mins')
+      .eq('user_id', userId)
+      .gte('created_at', startIso)
+      .lt('created_at', endIso);
+
+    if (error) throw new Error(`Error fetching workouts: ${error.message}`);
+
+    const total_duration = logs?.reduce((sum, log) => sum + (log.duration_mins || 0), 0) || 0;
+    const is_completed = logs && logs.length > 0;
+
+    return {
+      is_completed,
+      workouts_count: logs?.length || 0,
+      total_duration
+    };
   }
 };
