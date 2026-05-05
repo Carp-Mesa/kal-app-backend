@@ -56,23 +56,16 @@ export const workoutService = {
   },
 
   async getTodayProgress(userId: string) {
+    // Obtenemos la fecha actual en formato YYYY-MM-DD ajustada a UTC-5
     const now = new Date();
     now.setUTCHours(now.getUTCHours() - 5);
-    const todayStart = new Date(now);
-    todayStart.setUTCHours(0, 0, 0, 0);
-    todayStart.setUTCHours(todayStart.getUTCHours() + 5);
-    const startIso = todayStart.toISOString();
-
-    const todayEnd = new Date(todayStart);
-    todayEnd.setUTCDate(todayEnd.getUTCDate() + 1);
-    const endIso = todayEnd.toISOString();
+    const todayDateStr = now.toISOString().split('T')[0]; // Ejemplo: '2026-05-04'
 
     const { data: logs, error } = await supabase
       .from('workouts')
       .select('duration_mins')
       .eq('user_id', userId)
-      .gte('created_at', startIso)
-      .lt('created_at', endIso);
+      .eq('date', todayDateStr);
 
     if (error) throw new Error(`Error fetching workouts: ${error.message}`);
 
