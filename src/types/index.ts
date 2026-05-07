@@ -8,6 +8,7 @@ export interface Profile {
   carbs_goal: number;
   fats_goal: number;
   water_goal: number;
+  current_weight?: number; // Added current_weight
   created_at?: string;
   updated_at?: string;
 }

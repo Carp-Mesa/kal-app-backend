@@ -29,6 +29,17 @@ export const profileController = {
         delete profileData.id;
       }
 
+      // Convert current_weight to number if it's sent as a string
+      if (profileData.current_weight !== undefined && profileData.current_weight !== null) {
+        const parsedWeight = parseFloat(profileData.current_weight);
+        if (!isNaN(parsedWeight)) {
+          profileData.current_weight = parsedWeight;
+        } else {
+          res.status(400).json({ error: 'current_weight debe ser un número válido' });
+          return;
+        }
+      }
+
       const updatedProfile = await profileService.updateProfile(userId, profileData);
       
       res.status(200).json(updatedProfile);

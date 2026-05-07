@@ -1,7 +1,8 @@
 import { supabase } from '../config/supabase';
+import { Profile } from '../types';
 
 export const profileService = {
-  async updateProfile(userId: string, profileData: any) {
+  async updateProfile(userId: string, profileData: Partial<Profile>) {
     const { data, error } = await supabase
       .from('profiles')
       .update(profileData)
