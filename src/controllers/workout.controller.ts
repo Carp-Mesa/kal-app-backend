@@ -26,6 +26,21 @@ export const workoutController = {
     }
   },
 
+  async getHistory(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user!.id;
+
+      const limit = Math.max(1, Math.min(100, parseInt(req.query.limit as string) || 20));
+      const offset = Math.max(0, parseInt(req.query.offset as string) || 0);
+
+      const result = await workoutService.getUserWorkoutHistory(userId, limit, offset);
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
   async getTodayProgress(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user!.id;

@@ -36,6 +36,45 @@ export const workoutService = {
     } as Workout;
   },
 
+  async getUserWorkoutHistory(userId: string, limit: number, offset: number) {
+    const { data, error, count } = await supabase
+      .from('workouts')
+      .select(
+        `
+        id,
+        name,
+        date,
+        duration_mins,
+        notes,
+        created_at,
+        exercises (
+          id,
+          name,
+          sets,
+          reps,
+          weight_kg,
+          rpe
+        )
+        `,
+        { count: 'exact' }
+      )
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) throw new Error(`Error fetching workout history: ${error.message}`);
+
+    return {
+      data: data ?? [],
+      pagination: {
+        total: count ?? 0,
+        limit,
+        offset,
+        has_more: (count ?? 0) > offset + limit,
+      },
+    };
+  },
+
   async getTodayProgress(userId: string) {
     // Obtenemos la fecha actual en formato YYYY-MM-DD ajustada a UTC-5
     const now = new Date();
