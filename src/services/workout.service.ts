@@ -46,7 +46,6 @@ export const workoutService = {
         date,
         duration_mins,
         notes,
-        created_at,
         exercises (
           id,
           name,
@@ -59,7 +58,7 @@ export const workoutService = {
         { count: 'exact' }
       )
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+      .order('date', { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (error) throw new Error(`Error fetching workout history: ${error.message}`);
