@@ -5,21 +5,35 @@ export const workoutController = {
   async createFullWorkout(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user!.id;
-      const { name, duration_mins, notes, exercises } = req.body;
+      const { name, date, duration_mins, notes, exercises } = req.body;
 
       if (!name) {
         res.status(400).json({ error: 'Falta campo requerido: name' });
         return;
       }
 
+      // Validación estricta del formato de fecha (YYYY-MM-DD).
+      // Se trata como string opaco: NO se convierte a Date para evitar desplazamiento UTC.
+      const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+      if (date !== undefined && !DATE_REGEX.test(date)) {
+        res.status(400).json({ error: 'El campo date debe tener formato YYYY-MM-DD' });
+        return;
+      }
+
       const workoutData = {
         name: String(name),
+        date: date ?? null,           // null → la RPC usará la fecha de Colombia
         duration_mins: duration_mins ? Number(duration_mins) : 0,
         notes: notes ? String(notes) : undefined
       };
 
       const newWorkout = await workoutService.createFullWorkout(userId, workoutData, exercises);
-      res.status(201).json(newWorkout);
+
+      res.status(201).json({
+        id: newWorkout.id,
+        date: newWorkout.date,
+        status: 'success'
+      });
     } catch (error: any) {
       console.error(error);
       res.status(500).json({ error: error.message });
