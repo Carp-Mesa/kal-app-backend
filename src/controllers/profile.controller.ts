@@ -1,0 +1,23 @@
+import { Request, Response } from 'express';
+import { profileService } from '../services/profile.service';
+
+export const profileController = {
+  async updateProfile(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user!.id;
+      const profileData = req.body;
+
+      // Prevent updating the user ID explicitly
+      if (profileData.id) {
+        delete profileData.id;
+      }
+
+      const updatedProfile = await profileService.updateProfile(userId, profileData);
+      
+      res.status(200).json(updatedProfile);
+    } catch (error: any) {
+      console.error('[Profile Controller Error]:', error);
+      res.status(500).json({ error: error.message || 'Internal Server Error' });
+    }
+  }
+};
