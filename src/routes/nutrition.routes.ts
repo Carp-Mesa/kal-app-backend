@@ -8,6 +8,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get('/progress/today', nutritionController.getProgress);
+router.get('/progress/weekly', nutritionController.getWeeklyStats);
 
 router.get('/', nutritionController.getLogs);
 router.post('/', nutritionController.createLog);

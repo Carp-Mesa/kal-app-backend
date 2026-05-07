@@ -22,6 +22,17 @@ export const nutritionController = {
     }
   },
 
+  async getWeeklyStats(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user!.id;
+      const weeklyProgress = await nutritionService.getWeeklyProgress(userId);
+      res.status(200).json(weeklyProgress);
+    } catch (error: any) {
+      console.error('[NutritionController] getWeeklyStats error:', error);
+      res.status(500).json({ error: error.message || 'Internal Server Error' });
+    }
+  },
+
   async createLog(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user!.id;
