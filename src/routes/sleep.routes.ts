@@ -8,12 +8,12 @@ const router = Router();
 router.use(authMiddleware);
 
 // Rutas analíticas
-router.get('/progress/today', sleepController.getTodayProgress);
+router.get('/progress/today', sleepController.getSleepProgress);
 router.get('/recent', sleepController.getRecent);
 
 // CRUD
 router.get('/', sleepController.getLogs);
-router.post('/', sleepController.createLog);
+router.post('/', sleepController.createSleepLog);
 router.put('/:id', sleepController.updateLog);
 router.delete('/:id', sleepController.deleteLog);
 

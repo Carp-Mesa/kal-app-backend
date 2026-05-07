@@ -13,7 +13,14 @@ export const sleepService = {
     return data as SleepLog[];
   },
 
-  async createLog(userId: string, start_time: string, end_time: string, quality_score: number): Promise<SleepLog> {
+  async createSleepLog(userId: string, start_time: string, end_time: string, quality_score: number): Promise<SleepLog> {
+    const start = new Date(start_time);
+    const end = new Date(end_time);
+
+    if (start.getTime() >= end.getTime()) {
+      throw new Error('start_time debe ser anterior a end_time');
+    }
+
     const { data, error } = await supabase
       .from('sleep_logs')
       .insert([{ user_id: userId, start_time, end_time, quality_score }])
@@ -99,7 +106,7 @@ export const sleepService = {
     return enrichedLogs;
   },
 
-  async getTodayProgress(userId: string) {
+  async getTodaySleep(userId: string) {
     const now = new Date();
     // Offset UTC-5 Colombia
     now.setUTCHours(now.getUTCHours() - 5);
@@ -114,35 +121,36 @@ export const sleepService = {
     todayEnd.setUTCDate(todayEnd.getUTCDate() + 1);
     const endIso = todayEnd.toISOString();
 
-    // Consideramos los registros de sueño donde el end_time (cuando se levantó) fue "hoy"
-    const { data: logs, error } = await supabase
+    // El registro debe considerarse 'de hoy' si la fecha de fin (end_time) cae en el día actual
+    const { data: log, error } = await supabase
       .from('sleep_logs')
-      .select('start_time, end_time, quality_score')
+      .select('*')
       .eq('user_id', userId)
       .gte('end_time', startIso)
-      .lt('end_time', endIso);
+      .lt('end_time', endIso)
+      .order('end_time', { ascending: false })
+      .limit(1)
+      .single();
 
-    if (error) throw new Error(`Error fetching sleep logs: ${error.message}`);
-
-    let total_minutes = 0;
-    
-    if (logs) {
-      for (const log of logs) {
-        const start = new Date(log.start_time);
-        const end = new Date(log.end_time);
-        const diffMs = end.getTime() - start.getTime();
-        total_minutes += Math.floor(diffMs / 60000);
-      }
+    if (error && error.code !== 'PGRST116') {
+      throw new Error(`Error fetching today sleep: ${error.message}`);
     }
 
-    const hours = Math.floor(total_minutes / 60);
-    const minutes = total_minutes % 60;
-    const is_completed = logs && logs.length > 0;
+    if (!log) {
+      return null;
+    }
+
+    const start = new Date(log.start_time);
+    const end = new Date(log.end_time);
+    const diffMs = end.getTime() - start.getTime();
+    
+    const diffMins = Math.floor(diffMs / 60000);
+    const hours = Math.floor(diffMins / 60);
+    const minutes = diffMins % 60;
 
     return {
-      is_completed,
-      duration: { hours, minutes, total_minutes },
-      logs_count: logs?.length || 0
+      ...log,
+      duration: { hours, minutes, total_minutes: diffMins }
     };
   }
 };

@@ -23,7 +23,7 @@ export const sleepController = {
     }
   },
 
-  async createLog(req: Request, res: Response): Promise<void> {
+  async createSleepLog(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user!.id;
       const { start_time, end_time, quality_score } = req.body;
@@ -33,21 +33,14 @@ export const sleepController = {
         return;
       }
 
-      const start = new Date(start_time);
-      const end = new Date(end_time);
-
-      // Validación del viaje en el tiempo
-      if (start.getTime() >= end.getTime()) {
-        res.status(400).json({ error: 'start_time debe ser estrictamente anterior a end_time' });
-        return;
-      }
-
-      const score = Number(quality_score);
-
-      const newLog = await sleepService.createLog(userId, start.toISOString(), end.toISOString(), score);
+      const newLog = await sleepService.createSleepLog(userId, start_time, end_time, Number(quality_score));
       res.status(201).json(newLog);
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      if (error.message === 'start_time debe ser anterior a end_time') {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: error.message });
+      }
     }
   },
 
@@ -89,10 +82,10 @@ export const sleepController = {
       res.status(500).json({ error: error.message });
     }
   },
-  async getTodayProgress(req: Request, res: Response): Promise<void> {
+  async getSleepProgress(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user!.id;
-      const progress = await sleepService.getTodayProgress(userId);
+      const progress = await sleepService.getTodaySleep(userId);
       res.status(200).json(progress);
     } catch (error: any) {
       console.error(error);
