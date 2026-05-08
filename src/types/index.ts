@@ -62,6 +62,14 @@ export interface SleepLog {
   created_at?: string;
 }
 
+export interface DailySummary {
+  date: string;
+  total_calories: number;
+  calorie_goal: number;
+  total_water: number;
+  water_goal: number;
+}
+
 export interface ReminderConfig {
   id: string; // UUID
   user_id: string; // UUID

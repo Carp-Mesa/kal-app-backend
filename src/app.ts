@@ -8,6 +8,7 @@ import workoutRoutes from './routes/workout.routes';
 import sleepRoutes from './routes/sleep.routes';
 import authRoutes from './routes/auth.routes';
 import profileRoutes from './routes/profile.routes';
+import historyRoutes from './routes/history.routes';
 
 // Cargar variables de entorno solo en desarrollo local
 dotenv.config();
@@ -26,6 +27,7 @@ app.use('/api/water', waterRoutes);
 app.use('/api/workout', workoutRoutes);
 app.use('/api/sleep', sleepRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/history', historyRoutes);
 
 // Ruta de prueba (Heartbeat)
 app.get('/', (req: Request, res: Response) => {
