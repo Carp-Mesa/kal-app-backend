@@ -10,6 +10,7 @@ router.use(authMiddleware);
 // Rutas
 router.get('/progress/today', workoutController.getTodayProgress);
 router.get('/history', workoutController.getHistory);
+router.get('/:id', workoutController.getWorkoutDetail);
 router.post('/', workoutController.createFullWorkout);
 
 export default router;

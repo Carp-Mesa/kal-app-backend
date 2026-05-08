@@ -74,6 +74,38 @@ export const workoutService = {
     };
   },
 
+  async getWorkoutById(userId: string, workoutId: string) {
+    const { data, error } = await supabase
+      .from('workouts')
+      .select(`
+        id,
+        name,
+        date,
+        duration_mins,
+        notes,
+        exercises (
+          id,
+          name,
+          sets,
+          reps,
+          weight_kg,
+          rpe
+        )
+      `)
+      .eq('id', workoutId)
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw new Error(`Error fetching workout detail: ${error.message}`);
+    }
+
+    return data;
+  },
+
   async getTodayProgress(userId: string) {
     // Obtenemos la fecha actual en formato YYYY-MM-DD ajustada a UTC-5
     const now = new Date();

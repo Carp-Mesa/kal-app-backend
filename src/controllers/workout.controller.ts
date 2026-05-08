@@ -55,6 +55,25 @@ export const workoutController = {
     }
   },
 
+  async getWorkoutDetail(req: Request, res: Response): Promise<void> {
+    try {
+      const userId = req.user!.id;
+      const workoutId = req.params.id as string;
+
+      const workout = await workoutService.getWorkoutById(userId, workoutId);
+
+      if (!workout) {
+        res.status(404).json({ error: 'Entrenamiento no encontrado' });
+        return;
+      }
+
+      res.status(200).json(workout);
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
   async getTodayProgress(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user!.id;
