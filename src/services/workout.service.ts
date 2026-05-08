@@ -106,6 +106,18 @@ export const workoutService = {
     return data;
   },
 
+  async getExerciseSuggestions(userId: string): Promise<string[]> {
+    const { data, error } = await supabase.rpc('get_exercise_suggestions', {
+      p_user_id: userId
+    });
+
+    if (error) {
+      throw new Error(`Error fetching exercise suggestions: ${error.message}`);
+    }
+
+    return (data ?? []).map((row: any) => row.name);
+  },
+
   async getTodayProgress(userId: string) {
     // Obtenemos la fecha actual en formato YYYY-MM-DD ajustada a UTC-5
     const now = new Date();
