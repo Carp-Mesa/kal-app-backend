@@ -1,6 +1,5 @@
 export interface Profile {
-  id: string; // UUID
-  user_id: string; // UUID from Supabase Auth
+  id: string;
   username: string;
   full_name: string;
   calorie_goal: number;
@@ -8,7 +7,10 @@ export interface Profile {
   carbs_goal: number;
   fats_goal: number;
   water_goal: number;
-  current_weight?: number; // Added current_weight
+  current_weight?: number;
+  height?: number;
+  age?: number;
+  body_fat_percentage?: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -42,14 +44,21 @@ export interface Workout {
   exercises?: Exercise[]; // Relación incluída
 }
 
+export interface ExerciseSet {
+  id?: string;
+  exercise_id?: string;
+  set_number: number;
+  reps: number;
+  weight_kg: number;
+  created_at?: string;
+}
+
 export interface Exercise {
-  id: string; // UUID
-  workout_id: string; // UUID (Foreign Key to Workouts)
+  id: string;
+  workout_id: string;
   name: string;
   rpe: number;
-  weight_kg: number; // Actualizado de weights a weight_kg
-  reps: number;
-  sets: number;
+  exercise_sets?: ExerciseSet[];
   created_at?: string;
 }
 

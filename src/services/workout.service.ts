@@ -1,21 +1,26 @@
 import { supabase } from '../config/supabase';
 import { Workout, Exercise } from '../types';
 
+interface ExerciseInput {
+  name: string;
+  rpe: number;
+  sets: { reps: number; weight_kg: number }[];
+}
+
 export const workoutService = {
-  async createFullWorkout(userId: string, workoutData: Partial<Workout>, exercisesData: Partial<Exercise>[]): Promise<Workout> {
-    
-    // 1. Limpiar y estructurar el arreglo de ejercicios
+  async createFullWorkout(userId: string, workoutData: Partial<Workout>, exercisesData: ExerciseInput[]): Promise<Workout> {
+
     const formattedExercises = exercisesData?.map(ex => ({
       name: String(ex.name),
-      sets: Number(ex.sets) || 0,
-      reps: Number(ex.reps) || 0,
-      weight_kg: Number(ex.weight_kg) || 0,
-      rpe: Number(ex.rpe) || 0
+      rpe: Number(ex.rpe) || 0,
+      sets: (ex.sets || []).map((s: { reps: number; weight_kg: number }) => ({
+        reps: Number(s.reps) || 0,
+        weight_kg: Number(s.weight_kg) || 0
+      }))
     })) || [];
 
-    // 2. Ejecutar la función RPC (Transacción 100% atómica de Postgres)
     const { data, error } = await supabase.rpc('create_workout_with_exercises', {
-      p_user_id: userId, // Token-secure user_id
+      p_user_id: userId,
       p_name: workoutData.name,
       p_duration_mins: workoutData.duration_mins,
       p_date: workoutData.date || null,
@@ -27,12 +32,11 @@ export const workoutService = {
       throw new Error(`Error en Transacción RPC (Rollback automático aplicado por Postgres): ${error.message}`);
     }
 
-    // 3. Devolver la respuesta mapeando el ID que devolvió SQL
     return {
       id: data.workout_id,
       user_id: userId,
       ...workoutData,
-      exercises: formattedExercises as Exercise[]
+      exercises: formattedExercises as unknown as Exercise[]
     } as Workout;
   },
 
@@ -49,10 +53,13 @@ export const workoutService = {
         exercises (
           id,
           name,
-          sets,
-          reps,
-          weight_kg,
-          rpe
+          rpe,
+          exercise_sets (
+            id,
+            set_number,
+            reps,
+            weight_kg
+          )
         )
         `,
         { count: 'exact' }
@@ -63,8 +70,16 @@ export const workoutService = {
 
     if (error) throw new Error(`Error fetching workout history: ${error.message}`);
 
+    const mapped = (data ?? []).map((workout: any) => ({
+      ...workout,
+      exercises: workout.exercises?.map((ex: any) => ({
+        ...ex,
+        sets: ex.exercise_sets
+      })) ?? []
+    }));
+
     return {
-      data: data ?? [],
+      data: mapped,
       pagination: {
         total: count ?? 0,
         limit,
@@ -86,10 +101,13 @@ export const workoutService = {
         exercises (
           id,
           name,
-          sets,
-          reps,
-          weight_kg,
-          rpe
+          rpe,
+          exercise_sets (
+            id,
+            set_number,
+            reps,
+            weight_kg
+          )
         )
       `)
       .eq('id', workoutId)
@@ -103,7 +121,13 @@ export const workoutService = {
       throw new Error(`Error fetching workout detail: ${error.message}`);
     }
 
-    return data;
+    return {
+      ...data,
+      exercises: data.exercises?.map(({ exercise_sets, ...rest }) => ({
+        ...rest,
+        sets: exercise_sets
+      })) ?? []
+    };
   },
 
   async getExerciseSuggestions(userId: string): Promise<string[]> {

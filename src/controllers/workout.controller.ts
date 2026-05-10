@@ -12,6 +12,28 @@ export const workoutController = {
         return;
       }
 
+      if (!Array.isArray(exercises) || exercises.length === 0) {
+        res.status(400).json({ error: 'Falta campo requerido: exercises (array no vacío)' });
+        return;
+      }
+
+      for (const ex of exercises) {
+        if (!ex.name) {
+          res.status(400).json({ error: 'Cada ejercicio debe tener name' });
+          return;
+        }
+        if (!Array.isArray(ex.sets) || ex.sets.length === 0) {
+          res.status(400).json({ error: `El ejercicio "${ex.name}" debe tener al menos una serie en sets` });
+          return;
+        }
+        for (const set of ex.sets) {
+          if (typeof set.reps !== 'number' || typeof set.weight_kg !== 'number') {
+            res.status(400).json({ error: `Cada serie debe tener reps y weight_kg numéricos` });
+            return;
+          }
+        }
+      }
+
       // Validación estricta del formato de fecha (YYYY-MM-DD).
       // Se trata como string opaco: NO se convierte a Date para evitar desplazamiento UTC.
       const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
