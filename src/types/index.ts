@@ -2,6 +2,7 @@ export interface Profile {
   id: string;
   username: string;
   full_name: string;
+  avatar_url: string;
   calorie_goal: number;
   protein_goal: number;
   carbs_goal: number;
